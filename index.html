@@ -1,0 +1,903 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Independent Compound Probability - Mr. McLean Math</title>
+<style>
+  :root{
+    --bg:#f5f7fb;
+    --panel:#ffffff;
+    --ink:#17324d;
+    --muted:#61758a;
+    --line:#d8e2ec;
+    --blue:#1f6feb;
+    --green:#138a4b;
+    --red:#c53d3d;
+    --amber:#a16207;
+    --shadow:0 10px 30px rgba(15,23,42,.08);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
+  .wrap{max-width:1240px;margin:0 auto;padding:18px}
+  .hero,.card,.stat,.worksheet-paper{background:var(--panel);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow)}
+  .hero{padding:18px 20px;margin-bottom:16px;background:linear-gradient(135deg,#ffffff,#eef5ff)}
+  .hero h1{margin:0 0 6px;font-size:clamp(24px,3vw,38px)}
+  .hero p{margin:0;color:var(--muted);line-height:1.45}
+  .controls{padding:16px;margin-bottom:16px}
+  .grid{display:grid;gap:12px}
+  .controls-grid{grid-template-columns:repeat(5,minmax(120px,1fr));align-items:end}
+  label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
+  select,input[type="text"]{width:100%;min-height:46px;padding:10px 12px;border-radius:12px;border:1px solid #c8d4e1;font-size:16px;background:#fff;color:var(--ink)}
+  .toggle-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding-top:4px}
+  .pill{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fbfdff;padding:8px 10px;border-radius:999px;font-size:14px}
+  input[type="checkbox"]{transform:scale(1.15)}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  button{border:none;border-radius:14px;padding:12px 16px;font-size:16px;font-weight:700;cursor:pointer;color:#fff;background:var(--blue);box-shadow:var(--shadow)}
+  button.secondary{background:#64748b}
+  button.good{background:var(--green)}
+  button.warn{background:var(--amber)}
+  button:disabled{opacity:.55;cursor:not-allowed}
+  .status{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:16px}
+  .stat{padding:14px;text-align:center}
+  .stat .k{font-size:13px;color:var(--muted);margin-bottom:6px}
+  .stat .v{font-size:28px;font-weight:800}
+  .main{display:grid;grid-template-columns:1.15fr .95fr;gap:16px}
+  .card{padding:18px}
+  .badge{display:inline-block;padding:7px 10px;border-radius:999px;background:#e8f1ff;color:#1559bd;font-size:13px;font-weight:800;letter-spacing:.2px;margin-bottom:10px}
+  .question{font-size:22px;line-height:1.45;margin:0 0 10px}
+  .sub{
+    margin:0 0 14px;
+    color:var(--ink);
+    font-size:clamp(24px,3vw,34px);
+    font-weight:800;
+    line-height:1.35;
+  }
+  .prompt-big{font-size:22px;font-weight:700;color:var(--ink);line-height:1.4}
+  .helper{margin-top:8px;color:var(--muted);font-size:14px}
+  .feedback{display:none;margin-top:16px;padding:14px 16px;border-radius:16px;font-size:18px;font-weight:800}
+  .feedback.show{display:block}
+  .feedback.good{background:#e9f8ef;border:1px solid #bfe8cd;color:var(--green)}
+  .feedback.bad{background:#fff1f1;border:1px solid #f0caca;color:var(--red)}
+  .explain{display:none;margin-top:14px;padding:14px;border-radius:16px;background:#f8fbff;border:1px solid var(--line);line-height:1.55}
+  .explain.show{display:block}
+  .info-box{min-height:520px;border-radius:18px;border:1px dashed #c7d4e2;background:linear-gradient(180deg,#fcfeff,#f5f9ff);padding:18px}
+  .info-title{font-size:18px;font-weight:800;margin:0 0 12px}
+  .info-list{display:grid;gap:12px}
+  .info-item{padding:12px;border-radius:14px;background:#fff;border:1px solid #dfe9f3}
+  .info-item .t{font-size:13px;font-weight:800;color:#4f6b84;margin-bottom:4px;text-transform:uppercase;letter-spacing:.2px}
+  .info-item .v{font-size:18px;font-weight:700;line-height:1.4}
+  .formula{margin-top:14px;padding:12px;border-radius:14px;background:#fff;border:1px solid #dfe9f3;font-size:15px;line-height:1.5}
+  .worksheet-wrap{display:none;margin-top:16px}
+  .worksheet-wrap.show{display:block}
+  .sheet-controls{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 12px}
+  .worksheet-paper{padding:24px}
+  .worksheet-paper h2{margin:0 0 6px}
+  .worksheet-paper p{margin:0 0 12px;color:var(--muted)}
+  .ws-q{padding:14px 0 18px;border-bottom:1px solid #e6edf5}
+  .ws-q:last-child{border-bottom:none}
+  .answer-key{margin-top:24px;padding-top:16px;border-top:2px solid #d9e5f0}
+  .footer{text-align:center;color:var(--muted);font-size:13px;margin-top:14px}
+  .mono{font-family:Consolas,monospace}
+  .hc{background:#0f172a;color:#f8fafc}
+  .hc .hero,.hc .card,.hc .stat,.hc .worksheet-paper{background:#111827 !important;color:#f8fafc !important;border-color:#334155 !important;box-shadow:none !important}
+  .hc .hero{background:#111827 !important}
+  .hc .sub,.hc .helper,.hc .footer,.hc .stat .k,.hc .worksheet-paper p{color:#cbd5e1 !important}
+  .hc select,.hc input[type="text"]{background:#0b1220;color:#f8fafc;border-color:#475569}
+  .hc .pill{background:#0b1220;border-color:#475569}
+  .hc .info-box,.hc .formula,.hc .info-item{background:#0b1220 !important;border-color:#475569 !important}
+  .hc .feedback.good{background:#052e16;border-color:#166534;color:#bbf7d0}
+  .hc .feedback.bad{background:#3f1010;border-color:#991b1b;color:#fecaca}
+  .hc .explain{background:#0b1220;border-color:#475569}
+  @media (max-width:980px){
+    .controls-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .status{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .main{grid-template-columns:1fr}
+    .info-box{min-height:auto}
+  }
+  @media print{
+    body{background:#fff}
+    .hero,.controls,.status,.sheet-controls,.footer,#gameArea{display:none !important}
+    .worksheet-wrap{display:block !important}
+    .worksheet-paper{box-shadow:none;border:none;padding:0}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <h1>Independent Compound Probability</h1>
+    <p>Questions are based on compound probability with independent events only. Regular mode uses up to 2 events. Advanced mode can use 3 or more events. Created by Mr. McLean Math.</p>
+  </div>
+
+  <div class="card controls">
+    <div class="grid controls-grid">
+      <div>
+        <label for="modeSelect">Mode</label>
+        <select id="modeSelect">
+          <option value="regular" selected>Regular</option>
+          <option value="advanced">Advanced</option>
+        </select>
+      </div>
+      <div>
+        <label for="countSelect">Questions</label>
+        <select id="countSelect">
+          <option value="5">5</option>
+          <option value="10" selected>10</option>
+          <option value="15">15</option>
+        </select>
+      </div>
+      <div>
+        <label for="timerSelect">Timer</label>
+        <select id="timerSelect">
+          <option value="0" selected>Off</option>
+          <option value="30">30 s</option>
+          <option value="60">60 s</option>
+          <option value="90">90 s</option>
+          <option value="120">120 s</option>
+        </select>
+      </div>
+      <div>
+        <label for="viewSelect">View</label>
+        <select id="viewSelect">
+          <option value="game" selected>Game</option>
+          <option value="worksheet">Worksheet</option>
+        </select>
+      </div>
+      <div>
+        <label>Options</label>
+        <div class="toggle-row">
+          <label class="pill"><input type="checkbox" id="soundToggle"> Sound</label>
+          <label class="pill"><input type="checkbox" id="contrastToggle"> High contrast</label>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button id="startBtn">Start</button>
+      <button id="newBtn" class="secondary">New Question</button>
+      <button id="buildSheetBtn" class="warn">Build Worksheet</button>
+      <button id="printBtn" class="secondary">Print Worksheet</button>
+    </div>
+  </div>
+
+  <div id="gameArea">
+    <div class="status">
+      <div class="stat"><div class="k">Question</div><div class="v" id="qNum">0 / 0</div></div>
+      <div class="stat"><div class="k">Score</div><div class="v" id="score">0</div></div>
+      <div class="stat"><div class="k">Correct</div><div class="v" id="correctCount">0</div></div>
+      <div class="stat"><div class="k">Template</div><div class="v" id="templateTag">--</div></div>
+      <div class="stat"><div class="k">Time</div><div class="v" id="timerDisplay">--</div></div>
+    </div>
+
+    <div class="main">
+      <div class="card">
+        <div class="badge" id="questionType">Ready</div>
+        <p class="question" id="scenarioText">Choose your settings, then press Start.</p>
+        <p class="sub" id="questionText">The question will appear here.</p>
+
+        <div class="prompt-big">Type your answer</div>
+        <div style="display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;margin-top:12px">
+          <input id="answerInput" type="text" placeholder="Examples: 3/5, 0.6, 60%, or 60" autocomplete="off" disabled />
+          <button id="checkBtn" class="good" disabled>Check Answer</button>
+          <button id="nextBtn" class="secondary" disabled>Next</button>
+        </div>
+        <div class="helper">Accepted formats: <span class="mono">3/5</span>, <span class="mono">0.6</span>, <span class="mono">60%</span>, or just <span class="mono">60</span> for 60%.</div>
+
+        <div class="feedback" id="feedback"></div>
+        <div class="explain" id="explain"></div>
+      </div>
+
+      <div class="card">
+        <div class="info-box">
+          <p class="info-title">Question Summary</p>
+          <div class="info-list">
+            <div class="info-item">
+              <div class="t">Mode</div>
+              <div class="v" id="sideMode">--</div>
+            </div>
+            <div class="info-item">
+              <div class="t">Context</div>
+              <div class="v" id="sideContext">--</div>
+            </div>
+            <div class="info-item">
+              <div class="t">Event Structure</div>
+              <div class="v" id="sideStructure">--</div>
+            </div>
+            <div class="info-item">
+              <div class="t">Operation Focus</div>
+              <div class="v" id="sideOperation">--</div>
+            </div>
+          </div>
+          <div class="formula" id="formulaBox">Regular mode focuses on up to 2 independent events. Advanced mode can include 3 or more events, complements, and exactly questions.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="worksheet-wrap" id="worksheetWrap">
+    <div class="sheet-controls">
+      <button id="regenSheetBtn" class="warn">Regenerate Worksheet</button>
+      <button id="printSheetBtn" class="secondary">Print</button>
+    </div>
+    <div class="worksheet-paper" id="worksheetPaper"></div>
+  </div>
+
+  <div class="footer">Manual flow: answer each question, check it, then press Next when you are ready.</div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  const $ = id => document.getElementById(id);
+  const els = {
+    mode:$('modeSelect'),
+    count:$('countSelect'),
+    timer:$('timerSelect'),
+    view:$('viewSelect'),
+    sound:$('soundToggle'),
+    contrast:$('contrastToggle'),
+    startBtn:$('startBtn'),
+    newBtn:$('newBtn'),
+    buildSheetBtn:$('buildSheetBtn'),
+    printBtn:$('printBtn'),
+    qNum:$('qNum'),
+    score:$('score'),
+    correctCount:$('correctCount'),
+    templateTag:$('templateTag'),
+    timerDisplay:$('timerDisplay'),
+    questionType:$('questionType'),
+    scenarioText:$('scenarioText'),
+    questionText:$('questionText'),
+    answerInput:$('answerInput'),
+    checkBtn:$('checkBtn'),
+    nextBtn:$('nextBtn'),
+    feedback:$('feedback'),
+    explain:$('explain'),
+    worksheetWrap:$('worksheetWrap'),
+    worksheetPaper:$('worksheetPaper'),
+    regenSheetBtn:$('regenSheetBtn'),
+    printSheetBtn:$('printSheetBtn'),
+    gameArea:$('gameArea'),
+    sideMode:$('sideMode'),
+    sideContext:$('sideContext'),
+    sideStructure:$('sideStructure'),
+    sideOperation:$('sideOperation'),
+    formulaBox:$('formulaBox')
+  };
+
+  const state = {
+    running:false,
+    qIndex:0,
+    total:10,
+    score:0,
+    correct:0,
+    current:null,
+    timerId:null,
+    timeLeft:0,
+    lastTemplate:{regular:'', advanced:''},
+    worksheetLastTemplate:{regular:'', advanced:''}
+  };
+
+  const SIMPLE_PROBS = [
+    {num:1,den:2},
+    {num:1,den:3},
+    {num:2,den:3},
+    {num:1,den:4},
+    {num:3,den:4},
+    {num:1,den:5},
+    {num:2,den:5},
+    {num:3,den:5},
+    {num:4,den:5}
+  ];
+
+  const DECIMAL_PROBS = [0.6,0.7,0.8];
+
+  function gcd(a,b){
+    a = Math.round(a);
+    b = Math.round(b);
+    while(b){ [a,b] = [b, a % b]; }
+    return Math.abs(a);
+  }
+
+  function simplify(n,d){
+    if(d === 0) return {num:n, den:d};
+    if(n === 0) return {num:0, den:1};
+    const g = gcd(Math.abs(n), Math.abs(d));
+    n /= g;
+    d /= g;
+    if(d < 0){ n *= -1; d *= -1; }
+    return {num:n, den:d};
+  }
+
+  function frac(n,d){ return simplify(n,d); }
+  function clone(obj){ return JSON.parse(JSON.stringify(obj)); }
+  function valueOf(x){ return typeof x === 'number' ? x : x.num / x.den; }
+  function fracText(f){ return `${f.num}/${f.den}`; }
+  function trimNum(n){ return Number(n).toFixed(6).replace(/0+$/,'').replace(/\.$/,''); }
+  function fmtPct(x){ return `${trimNum(valueOf(x) * 100)}%`; }
+  function approxEqual(a,b){ return Math.abs(a-b) < 0.011; }
+  function capitalize(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+  function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random() * (i+1));
+      [a[i],a[j]] = [a[j],a[i]];
+    }
+    return a;
+  }
+
+  function isNiceFraction(f){
+    if(typeof f === 'number') return true;
+    return f.den <= 125;
+  }
+
+  function multiply(a,b){
+    if(typeof a === 'number' || typeof b === 'number') return valueOf(a) * valueOf(b);
+    return simplify(a.num*b.num, a.den*b.den);
+  }
+
+  function add(a,b){
+    if(typeof a === 'number' || typeof b === 'number') return valueOf(a) + valueOf(b);
+    return simplify(a.num*b.den + b.num*a.den, a.den*b.den);
+  }
+
+  function subtractFromOne(x){
+    if(typeof x === 'number') return 1 - x;
+    return simplify(x.den - x.num, x.den);
+  }
+
+  function power(x,n){
+    if(typeof x === 'number') return Math.pow(x,n);
+    return simplify(Math.pow(x.num,n), Math.pow(x.den,n));
+  }
+
+  function toDisplay(x){
+    if(typeof x === 'number'){
+      return `${trimNum(x)} = ${fmtPct(x)}`;
+    }
+    return `${fracText(x)} = ${trimNum(valueOf(x))} = ${fmtPct(x)}`;
+  }
+
+  function parseAnswer(str){
+    if(!str) return null;
+    let s = String(str).trim().replace(/,/g,'.').replace(/\s+/g,'');
+    if(!s) return null;
+
+    if(s.includes('/')){
+      const parts = s.split('/');
+      if(parts.length !== 2) return null;
+      const n = Number(parts[0]);
+      const d = Number(parts[1]);
+      if(!Number.isFinite(n) || !Number.isFinite(d) || d === 0) return null;
+      return {value:n/d};
+    }
+
+    if(s.endsWith('%')){
+      const n = Number(s.slice(0,-1));
+      if(!Number.isFinite(n)) return null;
+      return {value:n/100};
+    }
+
+    const n = Number(s);
+    if(!Number.isFinite(n)) return null;
+    return {value:n > 1 ? n/100 : n};
+  }
+
+  function playBeep(ok=true){
+    if(!els.sound.checked) return;
+    try{
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = ok ? 660 : 220;
+      gain.gain.value = 0.05;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.22);
+      osc.stop(ctx.currentTime + 0.22);
+    } catch(err){}
+  }
+
+  function clearFeedback(){
+    els.feedback.className = 'feedback';
+    els.feedback.textContent = '';
+    els.explain.className = 'explain';
+    els.explain.innerHTML = '';
+  }
+
+  function showFeedback(ok,msg){
+    els.feedback.textContent = msg;
+    els.feedback.className = `feedback show ${ok ? 'good' : 'bad'}`;
+  }
+
+  function refreshStats(){
+    els.qNum.textContent = `${Math.min(state.qIndex, state.total)} / ${state.total}`;
+    els.score.textContent = state.score;
+    els.correctCount.textContent = state.correct;
+    els.timerDisplay.textContent = Number(els.timer.value) ? state.timeLeft : '--';
+  }
+
+  function stopTimer(){
+    if(state.timerId){
+      clearInterval(state.timerId);
+      state.timerId = null;
+    }
+  }
+
+  function startTimer(){
+    stopTimer();
+    const limit = Number(els.timer.value);
+    state.timeLeft = limit;
+    refreshStats();
+    if(!limit) return;
+    state.timerId = setInterval(() => {
+      state.timeLeft--;
+      refreshStats();
+      if(state.timeLeft <= 0){
+        stopTimer();
+      }
+    },1000);
+  }
+
+  function randomRegularProb(){
+    return clone(pick(SIMPLE_PROBS.filter(p => p.den <= 5)));
+  }
+
+  function randomFractionPair(){
+    let p = randomRegularProb();
+    let q = randomRegularProb();
+    let tries = 0;
+    while((valueOf(p) === valueOf(q) || !isNiceFraction(multiply(p,q))) && tries < 20){
+      q = randomRegularProb();
+      tries++;
+    }
+    return [clone(p), clone(q)];
+  }
+
+  function probText(x){
+    return typeof x === 'number' ? trimNum(x) : fracText(x);
+  }
+
+  function modeLabel(mode){ return mode === 'regular' ? 'Regular' : 'Advanced'; }
+
+  function countContext(kind, p, labelA, labelB){
+    const other = p.den - p.num;
+    if(kind === 'spinner') return `A spinner is divided into ${p.den} equal parts. ${p.num} part${p.num===1?'':'s'} ${p.num===1?'is':'are'} ${labelA} and ${other} part${other===1?'':'s'} ${other===1?'is':'are'} ${labelB}.`;
+    if(kind === 'bag') return `A bag contains ${p.num} ${labelA} and ${other} ${labelB}.`;
+    if(kind === 'cards') return `A pile has ${p.num} ${labelA} cards and ${other} ${labelB} cards.`;
+    return `Out of ${p.den} equal outcomes, ${p.num} are ${labelA} and ${other} are ${labelB}.`;
+  }
+
+  function singleChanceContext(kind, p, labelA, labelB){
+    const other = p.den - p.num;
+    if(kind === 'spinner') return `A spinner is divided into ${p.den} equal parts. ${p.num} part${p.num===1?'':'s'} ${p.num===1?'is':'are'} ${labelA} and ${other} part${other===1?'':'s'} ${other===1?'is':'are'} ${labelB}.`;
+    if(kind === 'bag') return `A bag contains ${p.num} ${labelA} and ${other} ${labelB}. One item is chosen and then put back before a second item is chosen.`;
+    return countContext(kind, p, labelA, labelB);
+  }
+
+  function makeQuestion(data){
+    data.answered = false;
+    return data;
+  }
+
+  function genR1(){
+    const [p,q] = randomFractionPair();
+    const contexts = [
+      ['spinner',
+        `Spinner A is divided into ${p.den} equal parts. ${p.num} part${p.num===1?'':'s'} ${p.num===1?'is':'are'} red. Spinner B is divided into ${q.den} equal parts. ${q.num} part${q.num===1?'':'s'} ${q.num===1?'is':'are'} blue.`,
+        'landing on red on Spinner A first, and then blue on Spinner B second'],
+      ['bag',
+        `Bag A contains ${p.num} yellow counter${p.num===1?'':'s'} and ${p.den-p.num} green counter${p.den-p.num===1?'':'s'}. Bag B contains ${q.num} blue counter${q.num===1?'':'s'} and ${q.den-q.num} black counter${q.den-q.num===1?'':'s'}. One counter is chosen from each bag.`,
+        'getting a yellow counter from Bag A first, and then a blue counter from Bag B second'],
+      ['cards',
+        `Pile A has ${p.num} star card${p.num===1?'':'s'} and ${p.den-p.num} circle card${p.den-p.num===1?'':'s'}. Pile B has ${q.num} triangle card${q.num===1?'':'s'} and ${q.den-q.num} square card${q.den-q.num===1?'':'s'}. One card is taken from each pile.`,
+        'getting a star card from Pile A first, and then a triangle card from Pile B second']
+    ];
+    const c = pick(contexts);
+    const ans = multiply(p,q);
+    return makeQuestion({
+      template:'R1',
+      mode:'regular',
+      context:c[0],
+      structure:'2 events in order',
+      operation:'Multiply',
+      scenario:c[1],
+      question:`What is the probability of ${c[2]}?`,
+      answer:ans,
+      explanation:`Multiply the two independent probabilities: ${probText(p)} x ${probText(q)} = ${toDisplay(ans)}.`
+    });
+  }
+
+  function genR2(){
+    const p = randomRegularProb();
+    const contexts = [
+      ['coin',`A biased coin is flipped two times. The probability of heads on each flip is ${probText(p)}.`,'getting heads both times'],
+      ['spinner',`${singleChanceContext('spinner', p, 'green', 'yellow')} It is spun two times.`,'landing on green both times'],
+      ['bag',`${singleChanceContext('bag', p, 'red ball', 'blue ball')}`,'getting a red ball both times']
+    ];
+    const c = pick(contexts);
+    const ans = multiply(p,p);
+    return makeQuestion({
+      template:'R2', mode:'regular', context:c[0], structure:'same event twice', operation:'Multiply',
+      scenario:c[1], question:`What is the probability of ${c[2]}?`, answer:ans,
+      explanation:`Because the events are independent, multiply the probability by itself: ${probText(p)} x ${probText(p)} = ${toDisplay(ans)}.`
+    });
+  }
+
+  function genR3(){
+    const base = clone(pick([frac(1,2),frac(1,3),frac(2,3),frac(1,4),frac(3,4),frac(2,5),frac(3,5)]));
+    const fail = subtractFromOne(base);
+    const contexts = [
+      ['coin','A coin is flipped two times.','getting one head and one tail'],
+      ['spinner',`${countContext('spinner', base, 'blue', 'green')} It is spun two times.`,'landing on blue once and green once'],
+      ['bag',`${singleChanceContext('bag', base, 'yellow counter', 'black counter')}`,'getting one yellow counter and one black counter']
+    ];
+    const c = pick(contexts);
+    const path1 = multiply(base, fail);
+    const path2 = multiply(fail, base);
+    const ans = add(path1,path2);
+    return makeQuestion({
+      template:'R3', mode:'regular', context:c[0], structure:'2 paths', operation:'Multiply then add',
+      scenario:c[1], question:`What is the probability of ${c[2]}?`, answer:ans,
+      explanation:`There are 2 paths: ${probText(base)} x ${probText(fail)} and ${probText(fail)} x ${probText(base)}. Add them: ${toDisplay(ans)}.`
+    });
+  }
+
+  function genR4(){
+    const base = clone(pick([frac(1,2),frac(1,3),frac(2,3),frac(1,4),frac(3,4),frac(2,5),frac(3,5)]));
+    const other = subtractFromOne(base);
+    const contexts = [
+      ['coin','A coin is flipped two times.','both outcomes are the same'],
+      ['bag',`${singleChanceContext('bag', base, 'white sock', 'black sock')}`,'both draws are the same color'],
+      ['spinner',`${countContext('spinner', base, 'red', 'green')} It is spun two times.`,'both results are the same color']
+    ];
+    const c = pick(contexts);
+    const ans = add(multiply(base,base), multiply(other,other));
+    return makeQuestion({
+      template:'R4', mode:'regular', context:c[0], structure:'same type or opposite type paired', operation:'Multiply then add',
+      scenario:c[1], question:`What is the probability that ${c[2]}?`, answer:ans,
+      explanation:`Same means both first type or both second type. So calculate ${probText(base)} x ${probText(base)} and ${probText(other)} x ${probText(other)}, then add them to get ${toDisplay(ans)}.`
+    });
+  }
+
+  function genR5(){
+    const p = pick(DECIMAL_PROBS);
+    let q = pick(DECIMAL_PROBS);
+    let tries = 0;
+    while(q === p && tries < 10){ q = pick(DECIMAL_PROBS); tries++; }
+    const contexts = [
+      ['players',`Annika hits the target ${Math.round(p*10)} out of 10 times and Lorena hits the target ${Math.round(q*10)} out of 10 times.`,'both hit the target'],
+      ['machines',`Machine A works ${Math.round(p*10)} out of 10 times and Machine B works ${Math.round(q*10)} out of 10 times.`,'both machines work'],
+      ['tickets',`Ticket A wins ${Math.round(p*10)} out of 10 times and Ticket B wins ${Math.round(q*10)} out of 10 times.`,'both tickets win']
+    ];
+    const c = pick(contexts);
+    const ans = +(p*q).toFixed(4);
+    return makeQuestion({
+      template:'R5', mode:'regular', context:c[0], structure:'2 different independent objects', operation:'Multiply',
+      scenario:c[1], question:`What is the probability that ${c[2]}?`, answer:ans,
+      explanation:`Multiply the independent probabilities: ${trimNum(p)} x ${trimNum(q)} = ${toDisplay(ans)}.`
+    });
+  }
+
+  function genR6(){
+    const choices = [
+      ['die','A fair die is rolled two times. The probability of an even number on one roll is 1/2.','getting even both times',frac(1,4),'Multiply 1/2 x 1/2 = 1/4.'],
+      ['die','A fair die is rolled two times. The probability of a number greater than 4 on one roll is 1/3.','getting a number greater than 4 on both rolls',frac(1,9),'Multiply 1/3 x 1/3 = 1/9.'],
+      ['die','A fair die is rolled two times. The probability of an odd number on one roll is 1/2.','getting one odd and one even',frac(1,2),'There are 2 paths: odd then even or even then odd. So 1/2 x 1/2 + 1/2 x 1/2 = 1/2.']
+    ];
+    const c = pick(choices);
+    return makeQuestion({
+      template:'R6', mode:'regular', context:c[0], structure:'grouped die outcomes', operation:c[4].num === 1 && c[4].den === 2 ? 'Multiply then add' : 'Multiply',
+      scenario:c[1], question:`What is the probability of ${c[2]}?`, answer:c[3], explanation:c[4]
+    });
+  }
+
+  function genA1(){
+    const p = clone(pick([frac(1,2),frac(1,3),frac(2,3),frac(1,4),frac(3,4),frac(2,5),frac(3,5)]));
+    const contexts = [
+      ['spinner',`${countContext('spinner', p, 'red', 'green')} It is spun 3 times.`,'landing on red all 3 times'],
+      ['bag',`${singleChanceContext('bag', p, 'blue marble', 'yellow marble')} Three marbles are chosen with replacement.`, 'getting a blue marble all 3 times'],
+      ['coin',`A biased coin is flipped 3 times. The probability of heads on each flip is ${probText(p)}.`,'getting heads all 3 times']
+    ];
+    const c = pick(contexts);
+    const scenario = c[1];
+    const ans = multiply(multiply(p,p),p);
+    return makeQuestion({
+      template:'A1', mode:'advanced', context:c[0], structure:'3 events in order', operation:'Multiply',
+      scenario, question:`What is the probability of ${c[2]}?`, answer:ans,
+      explanation:`Multiply the probability 3 times: ${probText(p)} x ${probText(p)} x ${probText(p)} = ${toDisplay(ans)}.`
+    });
+  }
+
+  function genA2(){
+    const p = clone(pick([frac(1,2),frac(1,3),frac(2,3),frac(1,4),frac(3,4),frac(2,5),frac(3,5)]));
+    const fail = subtractFromOne(p);
+    const trials = pick([3,4]);
+    const contexts = [
+      ['spinner',`${countContext('spinner', p, 'blue', 'red')} It is spun ${trials} times.`,'at least one blue'],
+      ['tickets',`A scratch ticket wins ${p.num} out of ${p.den} times on average. You buy ${trials} tickets.`,'at least one win'],
+      ['player',`A player scores ${p.num} out of ${p.den} shots on average. The player takes ${trials} shots.`,'at least one score']
+    ];
+    const c = pick(contexts);
+    const scenario = c[1];
+    const failPower = power(fail,trials);
+    const ans = subtractFromOne(failPower);
+    return makeQuestion({
+      template:'A2', mode:'advanced', context:c[0], structure:`at least one in ${trials} events`, operation:'Complement',
+      scenario, question:`What is the probability of ${c[2]}?`, answer:ans,
+      explanation:`Use the complement. First find no success: ${probText(fail)}^${trials} = ${toDisplay(failPower)}. Then 1 - ${trimNum(valueOf(failPower))} = ${toDisplay(ans)}.`
+    });
+  }
+
+  function genA3(){
+    const p = clone(pick([frac(1,2),frac(1,3),frac(2,3),frac(1,4),frac(3,4),frac(2,5),frac(3,5)]));
+    const fail = subtractFromOne(p);
+    const trials = pick([3,4]);
+    const contexts = [
+      ['tickets',`A ticket wins ${p.num} out of ${p.den} times on average. You check ${trials} tickets.`,'no wins'],
+      ['player',`A player scores ${p.num} out of ${p.den} shots on average. The player takes ${trials} shots.`,'no scores'],
+      ['spinner',`${countContext('spinner', p, 'yellow', 'green')} It is spun ${trials} times.`,'no yellow results']
+    ];
+    const c = pick(contexts);
+    const scenario = c[1];
+    const ans = power(fail,trials);
+    return makeQuestion({
+      template:'A3', mode:'advanced', context:c[0], structure:`none in ${trials} events`, operation:'Multiply failures',
+      scenario, question:`What is the probability of ${c[2]}?`, answer:ans,
+      explanation:`No success means failure every time: ${probText(fail)}^${trials} = ${toDisplay(ans)}.`
+    });
+  }
+
+  function genA4(){
+    const p = clone(pick([frac(1,2),frac(1,3),frac(2,3),frac(1,4),frac(3,4),frac(2,5),frac(3,5)]));
+    const fail = subtractFromOne(p);
+    const contexts = [
+      ['shooter',`A player hits the target ${p.num} out of ${p.den} times on average. The player takes 3 shots.`,'exactly one hit'],
+      ['spinner',`${countContext('spinner', p, 'green', 'blue')} It is spun 3 times.`,'landing on green exactly one time'],
+      ['ticket',`A ticket wins ${p.num} out of ${p.den} times on average. Three tickets are checked.`,'exactly one win']
+    ];
+    const c = pick(contexts);
+    const scenario = c[1];
+    const onePath = multiply(p, multiply(fail, fail));
+    const ans = typeof onePath === 'number' ? 3*onePath : simplify(3*onePath.num, onePath.den);
+    return makeQuestion({
+      template:'A4', mode:'advanced', context:c[0], structure:'exactly one success in 3 events', operation:'Multiply then count paths',
+      scenario, question:`What is the probability of ${c[2]}?`, answer:ans,
+      explanation:`There are 3 paths for exactly one success. One path is ${probText(p)} x ${probText(fail)} x ${probText(fail)} = ${toDisplay(onePath)}. Multiply by 3 to get ${toDisplay(ans)}.`
+    });
+  }
+
+  function genA5(){
+    const p = clone(pick([frac(1,2),frac(1,3),frac(2,3),frac(1,4),frac(3,4),frac(2,5),frac(3,5)]));
+    const fail = subtractFromOne(p);
+    const contexts = [
+      ['shooter',`A player hits the target ${p.num} out of ${p.den} times on average. The player takes 3 shots.`,'exactly two hits'],
+      ['spinner',`${countContext('spinner', p, 'blue', 'red')} It is spun 3 times.`,'landing on blue exactly two times'],
+      ['ticket',`A ticket wins ${p.num} out of ${p.den} times on average. Three tickets are checked.`,'exactly two wins']
+    ];
+    const c = pick(contexts);
+    const scenario = c[1];
+    const onePath = multiply(multiply(p,p), fail);
+    const ans = typeof onePath === 'number' ? 3*onePath : simplify(3*onePath.num, onePath.den);
+    return makeQuestion({
+      template:'A5', mode:'advanced', context:c[0], structure:'exactly two successes in 3 events', operation:'Multiply then count paths',
+      scenario, question:`What is the probability of ${c[2]}?`, answer:ans,
+      explanation:`There are 3 paths for exactly two successes. One path is ${probText(p)} x ${probText(p)} x ${probText(fail)} = ${toDisplay(onePath)}. Multiply by 3 to get ${toDisplay(ans)}.`
+    });
+  }
+
+  function genA6(){
+    const forms = shuffle([
+      {type:'decimal', value:0.8, text:'0.8'},
+      {type:'fraction', value:3/5, text:'3/5'},
+      {type:'percent', value:0.7, text:'70%'}
+    ]);
+    const ans = +(forms[0].value * forms[1].value * forms[2].value).toFixed(6);
+    return makeQuestion({
+      template:'A6', mode:'advanced', context:'mixed formats', structure:'3 events with mixed number formats', operation:'Multiply',
+      scenario:`A player scores on ${forms[0].text} of shots on average, a spinner lands on red with probability ${forms[1].text}, and a ticket wins with probability ${forms[2].text}.`,
+      question:'What is the probability that all 3 events happen?',
+      answer:ans,
+      explanation:`Convert if needed, then multiply: ${forms[0].text} x ${forms[1].text} x ${forms[2].text} = ${toDisplay(ans)}.`
+    });
+  }
+
+  function genA7(){
+    const p = clone(pick([frac(1,2),frac(1,3),frac(2,3),frac(1,4),frac(3,4)]));
+    const q = clone(pick([frac(1,2),frac(1,3),frac(2,3),frac(1,4),frac(3,4)]));
+    const contexts = [
+      ['sports',`Player A scores ${p.num} out of ${p.den} shots on average. Player B scores ${q.num} out of ${q.den} shots on average. Player A shoots, then Player A shoots again, and then Player B shoots.`, 'Player A scoring on the first two shots and Player B scoring on the last shot'],
+      ['spinner',`Spinner A is divided into ${p.den} equal parts, and ${p.num} parts are red. Spinner B is divided into ${q.den} equal parts, and ${q.num} parts are blue. Spinner A is spun twice, then Spinner B is spun once.`, 'landing on red on the first two spins and blue on the last spin'],
+      ['games',`A team wins a home game ${p.num} out of ${p.den} times on average and wins an away game ${q.num} out of ${q.den} times on average. The team plays 2 home games and then 1 away game.`, 'winning both home games and then the away game']
+    ];
+    const c = pick(contexts);
+    const scenario = c[1];
+    const ans = multiply(multiply(p,p), q);
+    return makeQuestion({
+      template:'A7', mode:'advanced', context:c[0], structure:'two-event idea extended to 3 events', operation:'Multiply',
+      scenario, question:`What is the probability of ${c[2]}?`, answer:ans,
+      explanation:`Multiply all 3 independent probabilities: ${probText(p)} x ${probText(p)} x ${probText(q)} = ${toDisplay(ans)}.`
+    });
+  }
+
+  const GENERATORS = {
+    regular:[genR1,genR2,genR3,genR4,genR5,genR6],
+    advanced:[genA1,genA2,genA3,genA4,genA5,genA6,genA7]
+  };
+
+  function drawQuestion(mode, worksheet=false){
+    const lastKey = worksheet ? 'worksheetLastTemplate' : 'lastTemplate';
+    const last = state[lastKey][mode];
+    const gens = shuffle(GENERATORS[mode]);
+    let q = null;
+    for(const gen of gens){
+      const candidate = gen();
+      if(candidate.template !== last){
+        q = candidate;
+        break;
+      }
+      if(!q) q = candidate;
+    }
+    state[lastKey][mode] = q.template;
+    return q;
+  }
+
+  function setQuestion(q){
+    state.current = q;
+    q.answered = false;
+    clearFeedback();
+    els.questionType.textContent = `${modeLabel(q.mode)} Mode`;
+    els.templateTag.textContent = q.template;
+    els.scenarioText.textContent = q.scenario;
+    els.questionText.textContent = q.question;
+    els.answerInput.value = '';
+    els.answerInput.disabled = false;
+    els.checkBtn.disabled = false;
+    els.nextBtn.disabled = true;
+    els.sideMode.textContent = modeLabel(q.mode);
+    els.sideContext.textContent = capitalize(q.context);
+    els.sideStructure.textContent = q.structure;
+    els.sideOperation.textContent = q.operation;
+    els.formulaBox.textContent = q.mode === 'regular'
+      ? 'Regular mode uses up to 2 independent events. Focus: multiply, or multiply then add 2 simple paths.'
+      : 'Advanced mode can use 3 or more independent events. Focus: complements, exactly questions, and multi-step strategy.';
+    startTimer();
+    refreshStats();
+  }
+
+  function nextQuestion(forceNew=false){
+    if(!state.running && !forceNew) return;
+    if(!forceNew){
+      if(state.qIndex >= state.total){
+        finishSet();
+        return;
+      }
+      state.qIndex++;
+    }
+    const q = drawQuestion(els.mode.value, false);
+    setQuestion(q);
+  }
+
+  function finishSet(){
+    state.running = false;
+    stopTimer();
+    els.questionType.textContent = 'Finished';
+    els.scenarioText.textContent = `Set complete. Correct answers: ${state.correct} out of ${state.total}.`;
+    els.questionText.textContent = 'Press Start to play again with the same or new settings.';
+    els.answerInput.disabled = true;
+    els.checkBtn.disabled = true;
+    els.nextBtn.disabled = true;
+    showFeedback(true, `Final score: ${state.score}`);
+    els.explain.className = 'explain show';
+    els.explain.innerHTML = `You answered <strong>${state.correct}</strong> out of <strong>${state.total}</strong> correctly.`;
+    els.templateTag.textContent = '--';
+    refreshStats();
+  }
+
+  function checkAnswer(){
+    if(!state.current || state.current.answered) return;
+    const parsed = parseAnswer(els.answerInput.value);
+    const actual = valueOf(state.current.answer);
+    state.current.answered = true;
+    els.answerInput.disabled = true;
+    els.checkBtn.disabled = true;
+    els.nextBtn.disabled = false;
+    stopTimer();
+
+    if(parsed && approxEqual(parsed.value, actual)){
+      state.correct++;
+      state.score += 10;
+      showFeedback(true,'Correct!');
+      playBeep(true);
+    } else {
+      showFeedback(false,`Not quite. The correct answer is ${toDisplay(state.current.answer)}.`);
+      playBeep(false);
+    }
+
+    els.explain.className = 'explain show';
+    els.explain.innerHTML = `<strong>Working:</strong><br>${state.current.explanation}<br><br><strong>Accepted forms:</strong> ${toDisplay(state.current.answer)}`;
+    refreshStats();
+  }
+
+  function startGame(){
+    if(els.view.value === 'worksheet'){
+      buildWorksheet();
+      return;
+    }
+    els.worksheetWrap.classList.remove('show');
+    els.gameArea.style.display = '';
+    state.running = true;
+    state.qIndex = 0;
+    state.total = Number(els.count.value);
+    state.score = 0;
+    state.correct = 0;
+    state.lastTemplate.regular = '';
+    state.lastTemplate.advanced = '';
+    nextQuestion(false);
+  }
+
+  function worksheetLine(q, i){
+    return `
+      <div class="ws-q">
+        <strong>${i+1}.</strong> ${q.scenario}<br>
+        <div style="margin-top:10px"><strong>Question:</strong> ${q.question}</div>
+        <div style="height:40px"></div>
+        <div style="height:40px"></div>
+      </div>
+    `;
+  }
+
+  function buildWorksheet(){
+    els.gameArea.style.display = 'none';
+    els.worksheetWrap.classList.add('show');
+    const mode = els.mode.value;
+    const count = Number(els.count.value);
+    state.worksheetLastTemplate.regular = '';
+    state.worksheetLastTemplate.advanced = '';
+    const questions = [];
+    for(let i=0;i<count;i++) questions.push(drawQuestion(mode,true));
+
+    let html = `<h2>Independent Compound Probability Worksheet</h2><p>Mode: ${modeLabel(mode)}. All questions use independent events only.</p>`;
+    questions.forEach((q,i) => { html += worksheetLine(q,i); });
+    html += '<div class="answer-key"><h3>Answer Key</h3>';
+    questions.forEach((q,i) => {
+      html += `<p><strong>${i+1}.</strong> ${toDisplay(q.answer)}<br>${q.explanation}</p>`;
+    });
+    html += '</div>';
+    els.worksheetPaper.innerHTML = html;
+  }
+
+  els.startBtn.addEventListener('click', startGame);
+  els.newBtn.addEventListener('click', () => {
+    const q = drawQuestion(els.mode.value, false);
+    setQuestion(q);
+  });
+  els.checkBtn.addEventListener('click', checkAnswer);
+  els.nextBtn.addEventListener('click', () => nextQuestion(false));
+  els.answerInput.addEventListener('keydown', e => {
+    if(e.key === 'Enter' && !els.checkBtn.disabled) checkAnswer();
+  });
+  els.buildSheetBtn.addEventListener('click', buildWorksheet);
+  els.printBtn.addEventListener('click', () => { buildWorksheet(); window.print(); });
+  els.regenSheetBtn.addEventListener('click', buildWorksheet);
+  els.printSheetBtn.addEventListener('click', () => window.print());
+  els.view.addEventListener('change', () => {
+    if(els.view.value === 'worksheet') buildWorksheet();
+    else {
+      els.worksheetWrap.classList.remove('show');
+      els.gameArea.style.display = '';
+    }
+  });
+  els.contrast.addEventListener('change', () => {
+    document.body.classList.toggle('hc', els.contrast.checked);
+  });
+
+  refreshStats();
+})();
+</script>
+</body>
+</html>
