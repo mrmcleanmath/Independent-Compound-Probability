@@ -107,7 +107,7 @@
 <div class="wrap">
   <div class="hero">
     <h1>Independent Compound Probability</h1>
-    <p>Questions are based on compound probability with independent events only. Regular mode uses up to 2 events. Advanced mode can use 3 or more events. Created by Mr. McLean Math.</p>
+    <p>Questions use independent events only. Every question is a single path question, so students multiply the probabilities in order. Created by Mr. McLean Math.</p>
   </div>
 
   <div class="card controls">
@@ -208,7 +208,7 @@
               <div class="v" id="sideOperation">--</div>
             </div>
           </div>
-          <div class="formula" id="formulaBox">Regular mode focuses on up to 2 independent events. Advanced mode can include 3 or more events, complements, and exactly questions.</div>
+          <div class="formula" id="formulaBox">All questions are single-path independent-event questions. Multiply the probabilities in order.</div>
         </div>
       </div>
     </div>
@@ -330,22 +330,12 @@
 
   function isNiceFraction(f){
     if(typeof f === 'number') return true;
-    return f.den <= 125;
+    return f.den <= 625;
   }
 
   function multiply(a,b){
     if(typeof a === 'number' || typeof b === 'number') return valueOf(a) * valueOf(b);
     return simplify(a.num*b.num, a.den*b.den);
-  }
-
-  function add(a,b){
-    if(typeof a === 'number' || typeof b === 'number') return valueOf(a) + valueOf(b);
-    return simplify(a.num*b.den + b.num*a.den, a.den*b.den);
-  }
-
-  function subtractFromOne(x){
-    if(typeof x === 'number') return 1 - x;
-    return simplify(x.den - x.num, x.den);
   }
 
   function power(x,n){
@@ -458,25 +448,48 @@
     return [clone(p), clone(q)];
   }
 
+  function randomFractionTriple(){
+    let p = randomRegularProb();
+    let q = randomRegularProb();
+    let r = randomRegularProb();
+    let tries = 0;
+    while((!isNiceFraction(multiply(multiply(p,q),r))) && tries < 30){
+      p = randomRegularProb();
+      q = randomRegularProb();
+      r = randomRegularProb();
+      tries++;
+    }
+    return [clone(p), clone(q), clone(r)];
+  }
+
+  function randomFractionQuad(){
+    let p = randomRegularProb();
+    let q = randomRegularProb();
+    let r = randomRegularProb();
+    let s = randomRegularProb();
+    let tries = 0;
+    while((!isNiceFraction(multiply(multiply(multiply(p,q),r),s))) && tries < 40){
+      p = randomRegularProb();
+      q = randomRegularProb();
+      r = randomRegularProb();
+      s = randomRegularProb();
+      tries++;
+    }
+    return [clone(p), clone(q), clone(r), clone(s)];
+  }
+
   function probText(x){
     return typeof x === 'number' ? trimNum(x) : fracText(x);
   }
 
   function modeLabel(mode){ return mode === 'regular' ? 'Regular' : 'Advanced'; }
 
-  function countContext(kind, p, labelA, labelB){
-    const other = p.den - p.num;
-    if(kind === 'spinner') return `A spinner is divided into ${p.den} equal parts. ${p.num} part${p.num===1?'':'s'} ${p.num===1?'is':'are'} ${labelA} and ${other} part${other===1?'':'s'} ${other===1?'is':'are'} ${labelB}.`;
-    if(kind === 'bag') return `A bag contains ${p.num} ${labelA} and ${other} ${labelB}.`;
-    if(kind === 'cards') return `A pile has ${p.num} ${labelA} cards and ${other} ${labelB} cards.`;
-    return `Out of ${p.den} equal outcomes, ${p.num} are ${labelA} and ${other} are ${labelB}.`;
-  }
-
   function singleChanceContext(kind, p, labelA, labelB){
     const other = p.den - p.num;
     if(kind === 'spinner') return `A spinner is divided into ${p.den} equal parts. ${p.num} part${p.num===1?'':'s'} ${p.num===1?'is':'are'} ${labelA} and ${other} part${other===1?'':'s'} ${other===1?'is':'are'} ${labelB}.`;
-    if(kind === 'bag') return `A bag contains ${p.num} ${labelA} and ${other} ${labelB}. One item is chosen and then put back before a second item is chosen.`;
-    return countContext(kind, p, labelA, labelB);
+    if(kind === 'bag') return `A bag contains ${p.num} ${labelA} and ${other} ${labelB}. One item is chosen and then put back before the next item is chosen.`;
+    if(kind === 'cards') return `A pile has ${p.num} ${labelA} cards and ${other} ${labelB} cards. One card is taken, replaced, and then another card is taken.`;
+    return `Out of ${p.den} equal outcomes, ${p.num} are ${labelA} and ${other} are ${labelB}.`;
   }
 
   function makeQuestion(data){
@@ -522,49 +535,42 @@
     const c = pick(contexts);
     const ans = multiply(p,p);
     return makeQuestion({
-      template:'R2', mode:'regular', context:c[0], structure:'same event twice', operation:'Multiply',
-      scenario:c[1], question:`What is the probability of ${c[2]}?`, answer:ans,
+      template:'R2',
+      mode:'regular',
+      context:c[0],
+      structure:'same event twice',
+      operation:'Multiply',
+      scenario:c[1],
+      question:`What is the probability of ${c[2]}?`,
+      answer:ans,
       explanation:`Because the events are independent, multiply the probability by itself: ${probText(p)} x ${probText(p)} = ${toDisplay(ans)}.`
     });
   }
 
   function genR3(){
-    const base = clone(pick([frac(1,2),frac(1,3),frac(2,3),frac(1,4),frac(3,4),frac(2,5),frac(3,5)]));
-    const fail = subtractFromOne(base);
+    const p = randomRegularProb();
+    const q = randomRegularProb();
     const contexts = [
-      ['coin','A coin is flipped two times.','getting one head and one tail'],
-      ['spinner',`${countContext('spinner', base, 'blue', 'green')} It is spun two times.`,'landing on blue once and green once'],
-      ['bag',`${singleChanceContext('bag', base, 'yellow counter', 'black counter')}`,'getting one yellow counter and one black counter']
+      ['coin',`A biased coin is flipped first. The probability of heads is ${probText(p)}. Then a spinner is spun. The probability of landing on red is ${probText(q)}.`,'getting heads first, and then landing on red'],
+      ['bag',`${singleChanceContext('bag', p, 'white counter', 'black counter')} Then a spinner is spun, and the probability of landing on blue is ${probText(q)}.`,'getting a white counter first, and then landing on blue'],
+      ['cards',`${singleChanceContext('cards', p, 'star', 'circle')} Then a biased coin is flipped, and the probability of heads is ${probText(q)}.`,'getting a star card first, and then getting heads']
     ];
     const c = pick(contexts);
-    const path1 = multiply(base, fail);
-    const path2 = multiply(fail, base);
-    const ans = add(path1,path2);
+    const ans = multiply(p,q);
     return makeQuestion({
-      template:'R3', mode:'regular', context:c[0], structure:'2 paths', operation:'Multiply then add',
-      scenario:c[1], question:`What is the probability of ${c[2]}?`, answer:ans,
-      explanation:`There are 2 paths: ${probText(base)} x ${probText(fail)} and ${probText(fail)} x ${probText(base)}. Add them: ${toDisplay(ans)}.`
+      template:'R3',
+      mode:'regular',
+      context:c[0],
+      structure:'2 different events in order',
+      operation:'Multiply',
+      scenario:c[1],
+      question:`What is the probability of ${c[2]}?`,
+      answer:ans,
+      explanation:`Multiply the two independent probabilities in order: ${probText(p)} x ${probText(q)} = ${toDisplay(ans)}.`
     });
   }
 
   function genR4(){
-    const base = clone(pick([frac(1,2),frac(1,3),frac(2,3),frac(1,4),frac(3,4),frac(2,5),frac(3,5)]));
-    const other = subtractFromOne(base);
-    const contexts = [
-      ['coin','A coin is flipped two times.','both outcomes are the same'],
-      ['bag',`${singleChanceContext('bag', base, 'white sock', 'black sock')}`,'both draws are the same color'],
-      ['spinner',`${countContext('spinner', base, 'red', 'green')} It is spun two times.`,'both results are the same color']
-    ];
-    const c = pick(contexts);
-    const ans = add(multiply(base,base), multiply(other,other));
-    return makeQuestion({
-      template:'R4', mode:'regular', context:c[0], structure:'same type or opposite type paired', operation:'Multiply then add',
-      scenario:c[1], question:`What is the probability that ${c[2]}?`, answer:ans,
-      explanation:`Same means both first type or both second type. So calculate ${probText(base)} x ${probText(base)} and ${probText(other)} x ${probText(other)}, then add them to get ${toDisplay(ans)}.`
-    });
-  }
-
-  function genR5(){
     const p = pick(DECIMAL_PROBS);
     let q = pick(DECIMAL_PROBS);
     let tries = 0;
@@ -577,120 +583,112 @@
     const c = pick(contexts);
     const ans = +(p*q).toFixed(4);
     return makeQuestion({
-      template:'R5', mode:'regular', context:c[0], structure:'2 different independent objects', operation:'Multiply',
-      scenario:c[1], question:`What is the probability that ${c[2]}?`, answer:ans,
+      template:'R4',
+      mode:'regular',
+      context:c[0],
+      structure:'2 different independent objects',
+      operation:'Multiply',
+      scenario:c[1],
+      question:`What is the probability that ${c[2]}?`,
+      answer:ans,
       explanation:`Multiply the independent probabilities: ${trimNum(p)} x ${trimNum(q)} = ${toDisplay(ans)}.`
     });
   }
 
-  function genR6(){
+  function genR5(){
     const choices = [
       ['die','A fair die is rolled two times. The probability of an even number on one roll is 1/2.','getting even both times',frac(1,4),'Multiply 1/2 x 1/2 = 1/4.'],
       ['die','A fair die is rolled two times. The probability of a number greater than 4 on one roll is 1/3.','getting a number greater than 4 on both rolls',frac(1,9),'Multiply 1/3 x 1/3 = 1/9.'],
-      ['die','A fair die is rolled two times. The probability of an odd number on one roll is 1/2.','getting one odd and one even',frac(1,2),'There are 2 paths: odd then even or even then odd. So 1/2 x 1/2 + 1/2 x 1/2 = 1/2.']
+      ['die','A fair die is rolled two times. The probability of getting a 6 on one roll is 1/6.','getting a 6 on both rolls',frac(1,36),'Multiply 1/6 x 1/6 = 1/36.']
     ];
     const c = pick(choices);
     return makeQuestion({
-      template:'R6', mode:'regular', context:c[0], structure:'grouped die outcomes', operation:c[4].num === 1 && c[4].den === 2 ? 'Multiply then add' : 'Multiply',
-      scenario:c[1], question:`What is the probability of ${c[2]}?`, answer:c[3], explanation:c[4]
+      template:'R5',
+      mode:'regular',
+      context:c[0],
+      structure:'grouped die outcomes',
+      operation:'Multiply',
+      scenario:c[1],
+      question:`What is the probability of ${c[2]}?`,
+      answer:c[3],
+      explanation:c[4]
     });
   }
 
   function genA1(){
     const p = clone(pick([frac(1,2),frac(1,3),frac(2,3),frac(1,4),frac(3,4),frac(2,5),frac(3,5)]));
     const contexts = [
-      ['spinner',`${countContext('spinner', p, 'red', 'green')} It is spun 3 times.`,'landing on red all 3 times'],
+      ['spinner',`${singleChanceContext('spinner', p, 'red', 'green')} It is spun 3 times.`,'landing on red all 3 times'],
       ['bag',`${singleChanceContext('bag', p, 'blue marble', 'yellow marble')} Three marbles are chosen with replacement.`, 'getting a blue marble all 3 times'],
       ['coin',`A biased coin is flipped 3 times. The probability of heads on each flip is ${probText(p)}.`,'getting heads all 3 times']
     ];
     const c = pick(contexts);
-    const scenario = c[1];
     const ans = multiply(multiply(p,p),p);
     return makeQuestion({
-      template:'A1', mode:'advanced', context:c[0], structure:'3 events in order', operation:'Multiply',
-      scenario, question:`What is the probability of ${c[2]}?`, answer:ans,
+      template:'A1',
+      mode:'advanced',
+      context:c[0],
+      structure:'3 events in order',
+      operation:'Multiply',
+      scenario:c[1],
+      question:`What is the probability of ${c[2]}?`,
+      answer:ans,
       explanation:`Multiply the probability 3 times: ${probText(p)} x ${probText(p)} x ${probText(p)} = ${toDisplay(ans)}.`
     });
   }
 
   function genA2(){
-    const p = clone(pick([frac(1,2),frac(1,3),frac(2,3),frac(1,4),frac(3,4),frac(2,5),frac(3,5)]));
-    const fail = subtractFromOne(p);
-    const trials = pick([3,4]);
+    const [p,q,r] = randomFractionTriple();
     const contexts = [
-      ['spinner',`${countContext('spinner', p, 'blue', 'red')} It is spun ${trials} times.`,'at least one blue'],
-      ['tickets',`A scratch ticket wins ${p.num} out of ${p.den} times on average. You buy ${trials} tickets.`,'at least one win'],
-      ['player',`A player scores ${p.num} out of ${p.den} shots on average. The player takes ${trials} shots.`,'at least one score']
+      ['spinner',
+        `Spinner A is divided into ${p.den} equal parts, and ${p.num} parts are red. Spinner B is divided into ${q.den} equal parts, and ${q.num} parts are blue. Spinner C is divided into ${r.den} equal parts, and ${r.num} parts are yellow.`,
+        'landing on red first, then blue, and then yellow'],
+      ['bags',
+        `Bag A contains ${p.num} white counter${p.num===1?'':'s'} and ${p.den-p.num} black counter${p.den-p.num===1?'':'s'}. Bag B contains ${q.num} green counter${q.num===1?'':'s'} and ${q.den-q.num} orange counter${q.den-q.num===1?'':'s'}. Bag C contains ${r.num} star counter${r.num===1?'':'s'} and ${r.den-r.num} plain counter${r.den-r.num===1?'':'s'}. One counter is chosen from each bag.`,
+        'getting a white counter first, then a green counter, and then a star counter'],
+      ['mixed',
+        `A biased coin is flipped first, and the probability of heads is ${probText(p)}. Then a spinner is spun, and the probability of landing on blue is ${probText(q)}. Then a bag is used, and the probability of getting a red counter is ${probText(r)}.`,
+        'getting heads first, then blue, and then a red counter']
     ];
     const c = pick(contexts);
-    const scenario = c[1];
-    const failPower = power(fail,trials);
-    const ans = subtractFromOne(failPower);
+    const ans = multiply(multiply(p,q),r);
     return makeQuestion({
-      template:'A2', mode:'advanced', context:c[0], structure:`at least one in ${trials} events`, operation:'Complement',
-      scenario, question:`What is the probability of ${c[2]}?`, answer:ans,
-      explanation:`Use the complement. First find no success: ${probText(fail)}^${trials} = ${toDisplay(failPower)}. Then 1 - ${trimNum(valueOf(failPower))} = ${toDisplay(ans)}.`
+      template:'A2',
+      mode:'advanced',
+      context:c[0],
+      structure:'3 different events in order',
+      operation:'Multiply',
+      scenario:c[1],
+      question:`What is the probability of ${c[2]}?`,
+      answer:ans,
+      explanation:`Multiply the 3 independent probabilities in order: ${probText(p)} x ${probText(q)} x ${probText(r)} = ${toDisplay(ans)}.`
     });
   }
 
   function genA3(){
     const p = clone(pick([frac(1,2),frac(1,3),frac(2,3),frac(1,4),frac(3,4),frac(2,5),frac(3,5)]));
-    const fail = subtractFromOne(p);
-    const trials = pick([3,4]);
+    const q = clone(pick([frac(1,2),frac(1,3),frac(2,3),frac(1,4),frac(3,4),frac(2,5),frac(3,5)]));
     const contexts = [
-      ['tickets',`A ticket wins ${p.num} out of ${p.den} times on average. You check ${trials} tickets.`,'no wins'],
-      ['player',`A player scores ${p.num} out of ${p.den} shots on average. The player takes ${trials} shots.`,'no scores'],
-      ['spinner',`${countContext('spinner', p, 'yellow', 'green')} It is spun ${trials} times.`,'no yellow results']
+      ['sports',`Player A scores ${p.num} out of ${p.den} shots on average. Player A shoots twice, and then Player B shoots once. Player B scores ${q.num} out of ${q.den} shots on average.`, 'Player A scoring on the first two shots and Player B scoring on the last shot'],
+      ['spinner',`Spinner A is divided into ${p.den} equal parts, and ${p.num} parts are red. Spinner B is divided into ${q.den} equal parts, and ${q.num} parts are blue. Spinner A is spun twice, then Spinner B is spun once.`, 'landing on red on the first two spins and blue on the last spin'],
+      ['games',`A team wins a home game ${p.num} out of ${p.den} times on average and wins an away game ${q.num} out of ${q.den} times on average. The team plays 2 home games and then 1 away game.`, 'winning both home games and then the away game']
     ];
     const c = pick(contexts);
-    const scenario = c[1];
-    const ans = power(fail,trials);
+    const ans = multiply(multiply(p,p), q);
     return makeQuestion({
-      template:'A3', mode:'advanced', context:c[0], structure:`none in ${trials} events`, operation:'Multiply failures',
-      scenario, question:`What is the probability of ${c[2]}?`, answer:ans,
-      explanation:`No success means failure every time: ${probText(fail)}^${trials} = ${toDisplay(ans)}.`
+      template:'A3',
+      mode:'advanced',
+      context:c[0],
+      structure:'repeated event then new event',
+      operation:'Multiply',
+      scenario:c[1],
+      question:`What is the probability of ${c[2]}?`,
+      answer:ans,
+      explanation:`Multiply all 3 independent probabilities: ${probText(p)} x ${probText(p)} x ${probText(q)} = ${toDisplay(ans)}.`
     });
   }
 
   function genA4(){
-    const p = clone(pick([frac(1,2),frac(1,3),frac(2,3),frac(1,4),frac(3,4),frac(2,5),frac(3,5)]));
-    const fail = subtractFromOne(p);
-    const contexts = [
-      ['shooter',`A player hits the target ${p.num} out of ${p.den} times on average. The player takes 3 shots.`,'exactly one hit'],
-      ['spinner',`${countContext('spinner', p, 'green', 'blue')} It is spun 3 times.`,'landing on green exactly one time'],
-      ['ticket',`A ticket wins ${p.num} out of ${p.den} times on average. Three tickets are checked.`,'exactly one win']
-    ];
-    const c = pick(contexts);
-    const scenario = c[1];
-    const onePath = multiply(p, multiply(fail, fail));
-    const ans = typeof onePath === 'number' ? 3*onePath : simplify(3*onePath.num, onePath.den);
-    return makeQuestion({
-      template:'A4', mode:'advanced', context:c[0], structure:'exactly one success in 3 events', operation:'Multiply then count paths',
-      scenario, question:`What is the probability of ${c[2]}?`, answer:ans,
-      explanation:`There are 3 paths for exactly one success. One path is ${probText(p)} x ${probText(fail)} x ${probText(fail)} = ${toDisplay(onePath)}. Multiply by 3 to get ${toDisplay(ans)}.`
-    });
-  }
-
-  function genA5(){
-    const p = clone(pick([frac(1,2),frac(1,3),frac(2,3),frac(1,4),frac(3,4),frac(2,5),frac(3,5)]));
-    const fail = subtractFromOne(p);
-    const contexts = [
-      ['shooter',`A player hits the target ${p.num} out of ${p.den} times on average. The player takes 3 shots.`,'exactly two hits'],
-      ['spinner',`${countContext('spinner', p, 'blue', 'red')} It is spun 3 times.`,'landing on blue exactly two times'],
-      ['ticket',`A ticket wins ${p.num} out of ${p.den} times on average. Three tickets are checked.`,'exactly two wins']
-    ];
-    const c = pick(contexts);
-    const scenario = c[1];
-    const onePath = multiply(multiply(p,p), fail);
-    const ans = typeof onePath === 'number' ? 3*onePath : simplify(3*onePath.num, onePath.den);
-    return makeQuestion({
-      template:'A5', mode:'advanced', context:c[0], structure:'exactly two successes in 3 events', operation:'Multiply then count paths',
-      scenario, question:`What is the probability of ${c[2]}?`, answer:ans,
-      explanation:`There are 3 paths for exactly two successes. One path is ${probText(p)} x ${probText(p)} x ${probText(fail)} = ${toDisplay(onePath)}. Multiply by 3 to get ${toDisplay(ans)}.`
-    });
-  }
-
-  function genA6(){
     const forms = shuffle([
       {type:'decimal', value:0.8, text:'0.8'},
       {type:'fraction', value:3/5, text:'3/5'},
@@ -698,7 +696,11 @@
     ]);
     const ans = +(forms[0].value * forms[1].value * forms[2].value).toFixed(6);
     return makeQuestion({
-      template:'A6', mode:'advanced', context:'mixed formats', structure:'3 events with mixed number formats', operation:'Multiply',
+      template:'A4',
+      mode:'advanced',
+      context:'mixed formats',
+      structure:'3 events with mixed number formats',
+      operation:'Multiply',
       scenario:`A player scores on ${forms[0].text} of shots on average, a spinner lands on red with probability ${forms[1].text}, and a ticket wins with probability ${forms[2].text}.`,
       question:'What is the probability that all 3 events happen?',
       answer:ans,
@@ -706,27 +708,37 @@
     });
   }
 
-  function genA7(){
-    const p = clone(pick([frac(1,2),frac(1,3),frac(2,3),frac(1,4),frac(3,4)]));
-    const q = clone(pick([frac(1,2),frac(1,3),frac(2,3),frac(1,4),frac(3,4)]));
+  function genA5(){
+    const [p,q,r,s] = randomFractionQuad();
     const contexts = [
-      ['sports',`Player A scores ${p.num} out of ${p.den} shots on average. Player B scores ${q.num} out of ${q.den} shots on average. Player A shoots, then Player A shoots again, and then Player B shoots.`, 'Player A scoring on the first two shots and Player B scoring on the last shot'],
-      ['spinner',`Spinner A is divided into ${p.den} equal parts, and ${p.num} parts are red. Spinner B is divided into ${q.den} equal parts, and ${q.num} parts are blue. Spinner A is spun twice, then Spinner B is spun once.`, 'landing on red on the first two spins and blue on the last spin'],
-      ['games',`A team wins a home game ${p.num} out of ${p.den} times on average and wins an away game ${q.num} out of ${q.den} times on average. The team plays 2 home games and then 1 away game.`, 'winning both home games and then the away game']
+      ['spinners',
+        `Spinner A lands on red with probability ${probText(p)}. Spinner B lands on blue with probability ${probText(q)}. Spinner C lands on yellow with probability ${probText(r)}. Spinner D lands on green with probability ${probText(s)}.`,
+        'landing on red first, then blue, then yellow, and then green'],
+      ['mixed',
+        `A biased coin is flipped first, and the probability of heads is ${probText(p)}. Then a fair-style spinner lands on blue with probability ${probText(q)}. Then a bag gives a white counter with probability ${probText(r)}. Then a ticket wins with probability ${probText(s)}.`,
+        'getting heads first, then blue, then a white counter, and then a win'],
+      ['sports',
+        `A player makes the first shot with probability ${probText(p)}, the second shot with probability ${probText(q)}, the third shot with probability ${probText(r)}, and the fourth shot with probability ${probText(s)}.`,
+        'making all 4 shots']
     ];
     const c = pick(contexts);
-    const scenario = c[1];
-    const ans = multiply(multiply(p,p), q);
+    const ans = multiply(multiply(multiply(p,q),r),s);
     return makeQuestion({
-      template:'A7', mode:'advanced', context:c[0], structure:'two-event idea extended to 3 events', operation:'Multiply',
-      scenario, question:`What is the probability of ${c[2]}?`, answer:ans,
-      explanation:`Multiply all 3 independent probabilities: ${probText(p)} x ${probText(p)} x ${probText(q)} = ${toDisplay(ans)}.`
+      template:'A5',
+      mode:'advanced',
+      context:c[0],
+      structure:'4 events in order',
+      operation:'Multiply',
+      scenario:c[1],
+      question:`What is the probability of ${c[2]}?`,
+      answer:ans,
+      explanation:`Multiply the 4 independent probabilities in order: ${probText(p)} x ${probText(q)} x ${probText(r)} x ${probText(s)} = ${toDisplay(ans)}.`
     });
   }
 
   const GENERATORS = {
-    regular:[genR1,genR2,genR3,genR4,genR5,genR6],
-    advanced:[genA1,genA2,genA3,genA4,genA5,genA6,genA7]
+    regular:[genR1,genR2,genR3,genR4,genR5],
+    advanced:[genA1,genA2,genA3,genA4,genA5]
   };
 
   function drawQuestion(mode, worksheet=false){
@@ -763,8 +775,8 @@
     els.sideStructure.textContent = q.structure;
     els.sideOperation.textContent = q.operation;
     els.formulaBox.textContent = q.mode === 'regular'
-      ? 'Regular mode uses up to 2 independent events. Focus: multiply, or multiply then add 2 simple paths.'
-      : 'Advanced mode can use 3 or more independent events. Focus: complements, exactly questions, and multi-step strategy.';
+      ? 'Regular mode uses 2-event single-path independent probability questions only. Students multiply.'
+      : 'Advanced mode uses 3-event and 4-event single-path independent probability questions only. Students multiply in order.';
     startTimer();
     refreshStats();
   }
@@ -861,7 +873,7 @@
     const questions = [];
     for(let i=0;i<count;i++) questions.push(drawQuestion(mode,true));
 
-    let html = `<h2>Independent Compound Probability Worksheet</h2><p>Mode: ${modeLabel(mode)}. All questions use independent events only.</p>`;
+    let html = `<h2>Independent Compound Probability Worksheet</h2><p>Mode: ${modeLabel(mode)}. All questions are single-path independent-event questions.</p>`;
     questions.forEach((q,i) => { html += worksheetLine(q,i); });
     html += '<div class="answer-key"><h3>Answer Key</h3>';
     questions.forEach((q,i) => {
